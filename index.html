@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Калькулятор</title>
+    <style>
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --card: #22263a;
+            --accent: #d946ef;
+            --accent2: #f472b6;
+            --text: #e2e8f0;
+            --muted: #94a3b8;
+            --border: #2d3250;
+            --radius: 16px;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding: 20px 16px;
+            line-height: 1.5;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* Элементы гайда (скрыты по умолчанию) */
+        .guide-content {
+            display: none;
+            flex-direction: column;
+            gap: 20px;
+            width: 100%;
+        }
+
+        .header {
+            text-align: center;
+            padding: 20px 0;
+        }
+
+        .header .icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        .header h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent2), var(--accent));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            font-size: 0.95rem;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--accent2);
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-subtitle {
+            font-size: 0.9rem;
+            color: var(--muted);
+            margin-bottom: 16px;
+            font-style: italic;
+        }
+
+        ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 12px;
+            font-size: 0.95rem;
+        }
+
+        strong {
+            color: #fff;
+        }
+
+        .sub-list {
+            list-style-type: disc;
+            padding-left: 20px;
+            margin-top: 6px;
+        }
+
+        .sub-list li {
+            margin-bottom: 6px;
+            color: #cbd5e1;
+        }
+
+        .search-box {
+            background: var(--surface);
+            border-left: 4px solid var(--accent);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-top: 14px;
+            font-size: 0.88rem;
+        }
+
+        .search-title {
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 4px;
+        }
+
+        .search-query {
+            font-family: monospace;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #f472b6;
+        }
+
+        .badge-alert {
+            background: rgba(239, 68, 68, 0.15);
+            border: 1px solid #ef4444;
+            color: #f87171;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.88rem;
+            margin-top: 14px;
+        }
+
+        .hint-tg {
+            background: rgba(217, 70, 239, 0.1);
+            border: 1px dashed var(--accent);
+            color: var(--text);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            margin-top: 12px;
+            text-align: center;
+        }
+
+        footer {
+            text-align: center;
+            font-size: 0.8rem;
+            color: var(--muted);
+            margin-top: 20px;
+            padding-bottom: 20px;
+        }
+
+        /* Стили Секретного Калькулятора */
+        .calc-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            min-height: 80vh;
+        }
+
+        .calculator {
+            background: #1e2235;
+            border: 2px solid #2d3250;
+            border-radius: 24px;
+            padding: 20px;
+            width: 100%;
+            max-width: 340px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+        }
+
+        .calc-screen {
+            background: #0f111a;
+            border-radius: 12px;
+            color: #fff;
+            font-size: 2.2rem;
+            text-align: right;
+            padding: 15px;
+            margin-bottom: 20px;
+            overflow-x: auto;
+            white-space: nowrap;
+            font-family: monospace;
+            min-height: 70px;
+        }
+
+        .calc-buttons {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+
+        .calc-btn {
+            background: #2a2f4a;
+            border: none;
+            border-radius: 14px;
+            color: #fff;
+            font-size: 1.3rem;
+            padding: 18px 0;
+            cursor: pointer;
+            font-weight: 600;
+            transition: background 0.2s;
+        }
+
+        .calc-btn:active {
+            background: #3b4268;
+        }
+
+        .calc-btn.op {
+            background: #f472b6;
+            color: #0f1117;
+        }
+
+        .calc-btn.op:active {
+            background: #d946ef;
+        }
+
+        .calc-btn.eq {
+            background: #d946ef;
+            color: #fff;
+        }
+
+        .calc-btn.eq:active {
+            background: #f472b6;
+        }
+
+        .calc-btn.clear {
+            background: #e11d48;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Экран калькулятора (Маскировка) -->
+    <div class="calc-wrapper" id="calcWrapper">
+        <div class="calculator">
+            <div class="calc-screen" id="calcScreen">0</div>
+            <div class="calc-buttons">
+                <button class="calc-btn clear" onclick="clearScreen()">C</button>
+                <button class="calc-btn op" onclick="pressOp('/')">/</button>
+                <button class="calc-btn op" onclick="pressOp('*')">*</button>
+                <button class="calc-btn op" onclick="pressOp('-')">-</button>
+
+                <button class="calc-btn" onclick="pressNum('7')">7</button>
+                <button class="calc-btn" onclick="pressNum('8')">8</button>
+                <button class="calc-btn" onclick="pressNum('9')">9</button>
+                <button class="calc-btn op" onclick="pressOp('+')">+</button>
+
+                <button class="calc-btn" onclick="pressNum('4')">4</button>
+                <button class="calc-btn" onclick="pressNum('5')">5</button>
+                <button class="calc-btn" onclick="pressNum('6')">6</button>
+                <button class="calc-btn eq" onclick="calculate()">=</button>
+
+                <button class="calc-btn" onclick="pressNum('1')">1</button>
+                <button class="calc-btn" onclick="pressNum('2')">2</button>
+                <button class="calc-btn" onclick="pressNum('3')">3</button>
+                <button class="calc-btn" onclick="pressNum('0')">0</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Основной Контент Гайда (Появится после ввода пароля) -->
+    <div class="container guide-content" id="guideContent">
+
+        <!-- Шапка -->
+        <div class="header">
+            <div class="icon">✨</div>
+            <h1>Инструкция по свободе смартфона</h1>
+            <p>Простые и рабочие способы обойти ограничения. <br>Внимательно читай шаги и всё получится! ❤️</p>
+        </div>
+
+        <!-- Способ 1 -->
+        <div class="card">
+            <div class="card-title">1. Сброс отслеживания через «Цифровое благополучие»</div>
+            <div class="card-subtitle">Этот способ полностью отключает сбор статистики и убирает ограничения, завязанные
+                на экранное время.</div>
+            <ol>
+                <li>Открой главные <strong>«Настройки»</strong> телефона.</li>
+                <li>Листай вниз, пока не найдёшь пункт <strong>«Цифровое благополучие и родительский контроль»</strong>
+                    (в зависимости от модели может называться просто <i>«Цифровое благополучие»</i> или
+                    <i>«Использование устройства»</i>).</li>
+                <li>В открывшемся окне посмотри в самый верхний правый угол — там будут <strong>три вертикальные
+                        точки</strong> (меню). Нажми на них.</li>
+                <li>В выпавшем маленьком меню выбери строчку <strong>«Управление данными»</strong>.</li>
+                <li>Ты увидишь пункт <strong>«Использование устройства за день»</strong> и ползунок рядом с ним. Если он
+                    включен (горит цветным), нажми на него.</li>
+                <li>Снизу экрана всплывёт окно с кнопкой <strong>«Закрыть доступ в настройках»</strong> (или «Отключить
+                    доступ»). Смело нажимай на неё.</li>
+                <li>Телефон автоматически перекинет тебя в глубокие системные настройки доступов. Найди в этом списке
+                    приложение <strong>«Цифровое благополучие»</strong>, нажми на него и деактивируй главный
+                    переключатель <strong>«Разрешить доступ к истории использования»</strong>. Готово! Тебя больше не
+                    ограничивают.</li>
+            </ol>
+        </div>
+
+        <!-- Способ 2 -->
+        <div class="card">
+            <div class="card-title">2. Обход ночной блокировки экрана (Дата и Время)</div>
+            <div class="card-subtitle">Идеально, если родители выставили «Сон» (например, телефон блокируется с 22:00 до
+                05:00). Обманем внутренние часы телефона.</div>
+            <ol>
+                <li>Зайди в <strong>«Настройки»</strong> телефона.</li>
+                <li>Найди раздел <strong>«Система»</strong> (на некоторых телефонах это называется <i>«Общие
+                        настройки»</i> или прячется внутри пункта <i>«Дополнительно»</i>). Найди там пункт <strong>«Дата
+                        и время»</strong>.</li>
+                <li>Здесь тебе нужно обязательно выключить два тумблера: <strong>«Автоопределение времени»</strong> (или
+                    «Время сети») и <strong>«Автоматический часовой пояс»</strong>. Если их не выключить, телефон сам
+                    вернёт правильное время обратно.</li>
+                <li>Теперь у тебя есть два пути:
+                    <ul class="sub-list">
+                        <li><strong>Путь А (Простой):</strong> Нажми на пункт «Время» и вручную перекрути стрелки назад.
+                            Например, если на часах уже 22:30 и всё заблокировалось, выставь вручную 17:00. Система
+                            решит, что сейчас день, и снимет блок.</li>
+                        <li><strong>Путь Б (Надёжный):</strong> Нажми на пункт «Часовой пояс» или «Регион» и выбери
+                            город, где сейчас разгар дня (например, выбери регион, который отстаёт от твоего времени на
+                            5–8 часов). Часы переведутся сами, и блокировка спадёт.</li>
+                    </ul>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Способ 3 -->
+        <div class="card">
+            <div class="card-title">3. Вход через Гостевой профиль</div>
+            <div class="card-subtitle">Родительский контроль — это программа, которая привязана строго к твоему
+                основному аккаунту Google. Внутри «Гостя» ограничений просто нет.</div>
+            <ol>
+                <li>Зайди в <strong>«Настройки»</strong> → найди раздел <strong>«Система»</strong> → пункт
+                    <strong>«Несколько пользователей»</strong> (или <i>«Пользователи и аккаунты»</i>).</li>
+                <li>Включи эту функцию (передвинь тумблер вверху) и выбери пункт <strong>«Гость»</strong> (или «Добавить
+                    гостя»).</li>
+                <li>Смартфон пару секунд подумает и загрузит абсолютно чистый, новый рабочий стол. Здесь нет никаких
+                    родительских запретов. Ты можешь заходить в браузер, скачивать приложения или сидеть в соцсетях.
+                </li>
+                <li>Когда нужно будет вернуться, просто потяни шторку уведомлений сверху вниз, нажмите на круглую иконку
+                    пользователя и выбери свой основной профиль.</li>
+            </ol>
+        </div>
+
+        <!-- Способ 4 -->
+        <div class="card">
+            <div class="card-title">4. Сброс ограничений приложения Family Link</div>
+            <div class="card-subtitle">Если контроль работает через официальное приложение от Google, мы можем на время
+                «оглушить» его память.</div>
+
+            <div class="badge-alert"
+                style="background: rgba(245, 158, 11, 0.12); border-color: #f59e0b; color: #fbbf24; margin-bottom: 14px;">
+                <strong>⚠️ СВЕРХВАЖНОЕ ПРАВИЛО СИНХРОНИЗАЦИИ:</strong><br>
+                Перед тем как нажимать кнопку очистки, <strong>ОБЯЗАТЕЛЬНО полностью выключи интернет</strong> на
+                телефоне (и домашний Wi-Fi, и мобильные данные). Если этого не сделать, приложение мгновенно свяжется с
+                сервером и тут же вернёт все запреты назад. Включать интернет можно только после того, как
+                воспользуешься лазейкой.
+            </div>
+
+            <ol>
+                <li>Выключи Wi-Fi и мобильный интернет через верхнюю шторку телефона.</li>
+                <li>Зайди в <strong>«Настройки»</strong> и открой раздел <strong>«Приложения»</strong> (или <i>«Все
+                        приложения» / «Диспетчер приложений»</i>).</li>
+                <li>Найди в огромском списке программу с названием <strong>Family Link</strong> (или <i>Family Link для
+                        детей</i>) и нажми на неё.</li>
+                <li>Внутри настроек приложения найди пункт <strong>«Хранилище»</strong> (на некоторых телефонах
+                    называется <i>«Память»</i>).</li>
+                <li>Нажми на кнопку <strong>«Очистить данные»</strong> (или <i>«Стереть данные» / «Очистить
+                        хранилище»</i>) и подтверди действие.</li>
+            </ol>
+            <div class="badge-alert">
+                <strong>Важно:</strong> Это не удалит аккаунт и не сбросит родительский пароль, но заставит приложение
+                «забыть» текущие таймеры и ограничения на несколько часов, пока оно снова не синхронизируется через
+                интернет. Поэтому это для того случая, когда интернет отключен.
+            </div>
+        </div>
+
+        <!-- Способ 5 -->
+        <div class="card">
+            <div class="card-title">5. Обход лимитов через обычный «Ватсап» и плавающие окна</div>
+            <div class="card-subtitle">Если заблокирован YouTube или Chrome, но сам Ватсап открыт, можно смотреть
+                контент внутри него.</div>
+            <ol>
+                <li>Отправь в чат самой себе (или в «Избранное» / на свой старый номер) прямую ссылку на нужный сайт или
+                    видео с YouTube.</li>
+                <li><strong>Как смотреть YouTube или TikTok:</strong> Нажми на превью присланного видео прямо внутри
+                    чата Ватсап. Оно начнёт воспроизводиться во встроенном мини-плеере. Если в углу плеера есть значок
+                    стрелочки или маленького квадрата, нажми на него — это режим «Картинка в картинке». Видео сожмётся в
+                    плавающее окошко, и ты сможешь смотреть его, даже переписываясь.</li>
+                <li><strong>Как сидеть на сайтах:</strong> Ссылки на сайты, открытые напрямую внутри чата Ватсап,
+                    загружаются через его собственный внутренний микро-браузер, минуя ограничения Google Chrome.</li>
+            </ol>
+
+            <div class="badge-alert"
+                style="background: rgba(245, 158, 11, 0.12); border-color: #f59e0b; color: #fbbf24; margin-top: 12px;">
+                <strong>⚠️ ВНИМАНИЕ (КАК ТЕБЯ МОГУТ СПАЛИТЬ):</strong> <br>
+                1. Если у родителей настроен контроль прямо на домашнем Wi-Fi роутере или включен скрытый DNS-фильтр, то
+                даже внутри Ватсапа они увидят в логах сети, что твой телефон отправлял запросы на сервера YouTube или
+                запрещённых сайтов.<br>
+                2. Если сам Ватсап родители заблокируют по времени, эта лазейка закроется.
+            </div>
+
+            <div class="hint-tg">
+                🤫 <strong>Маленький секрет:</strong> Если ты под любым предлогом добудешь себе обычный
+                <strong>Телеграм</strong>, то через его встроенный плеер и скрытый браузер обходить такие запреты станет
+                в сто раз проще, и там открывается вообще всё подряд без сбоев!
+            </div>
+        </div>
+
+        <!-- Способ 6 -->
+        <div class="card" style="border-color: var(--accent);">
+            <div class="card-title" style="color: var(--accent);">6. Опасный вариант: Безопасный режим (Safe Mode)</div>
+            <div class="card-subtitle">Использовать аккуратно. Этот режим временно отключает абсолютно все сторонние
+                программы блокировки.</div>
+
+            <div class="badge-alert"
+                style="background: rgba(217, 70, 239, 0.15); border-color: var(--accent); color: #f472b6; margin-bottom: 14px; font-weight: bold;">
+                ⚠️ СТОП! Прежде чем ЭТО повторять, обязательно напиши мне в чат свою точную модель телефона, я проверю
+                комбинацию кнопок! И если ты знаешь, какое именно приложение контроля у вас установлено (Family Link,
+                Kaspersky или ещё что-то) — обязательно напиши мне его название!
+            </div>
+
+            <ol>
+                <li>Зажми и удерживай физическую кнопку питания на корпусе телефона, пока на экране не появится меню
+                    выключения.</li>
+                <li>На экране телефона <strong>нажми пальцем на кнопку «Выключение» и держи её, не отпуская</strong>,
+                    около 3–5 секунд.</li>
+                <li>Появится скрытое сообщение: <i>«Перейти в безопасный режим?»</i>. Нажми «ОК».</li>
+                <li>Телефон перезагрузится, родительский контроль отключится, и ты сможешь пользоваться стандартным
+                    встроенным браузером.</li>
+                <li><strong>Как выйти:</strong> Обычная перезагрузка телефона вернёт всё назад.</li>
+            </ol>
+
+            <div class="badge-alert" style="margin-top: 12px;">
+                <strong>🚨 ГЛАВНОЕ ПАЛЕВО (ОБРАТИ ВНИМАНИЕ):</strong> <br>
+                Когда телефон включится, в самом низу экрана на протяжении всей работы будет крупно и серо гореть
+                надпись <strong>«Безопасный режим»</strong>.
+                <br><br>
+                Эта надпись <strong>НЕ ИСЧЕЗНЕТ и никак не скрывается</strong>, пока ты полностью не перезагрузишь
+                телефон! Если родители внезапно подойдут и возьмут телефон в руки — они моментально увидят эту строчку и
+                всё поймут. Ни в коем случае не оставляй телефон просто так и не показывай им экран в этот момент, пока
+                не сделаешь обычную перезагрузку!
+            </div>
+
+            <div class="search-box">
+                <div class="search-title">ℹ️ Если не получается войти стандартно:</div>
+                На разных марках телефонов (особенно старых Samsung или Xiaomi) вход может отличаться кнопками. Если
+                зажатие кнопки на экране не вызвало меню, просто вбей в Google запрос под модель её телефона:
+                <br><br>
+                • <span class="search-query">как войти в безопасный режим на [модель телефона]</span>
+            </div>
+        </div>
+
+        <!-- Способ 7 -->
+        <div class="card" style="border-color: #ef4444;">
+            <div class="card-title" style="color: #ef4444;">7. САМЫЙ КРАЙНИЙ/ЯДЕРНЫЙ СЛУЧАЙ: Снос Сервисов Google Play
+            </div>
+            <div class="card-subtitle">Использовать только в безвыходной ситуации, когда готова к риску. Полностью рубит
+                связь с сервером контроля.</div>
+            <ol>
+                <li>Зайди в <strong>«Настройки»</strong> → <strong>«Приложения»</strong> → <strong>«Все
+                        приложения»</strong>.</li>
+                <li>Найди программу <strong>«Сервисы Google Play»</strong> (Google Play Services) и нажми на неё.</li>
+                <li>Открой пункт <strong>«Хранилище»</strong> (или <i>«Память»</i>).</li>
+                <li>Нажми <strong>«Управление местом»</strong> (или Очистить) → и выбери <strong>«Удалить все
+                        данные»</strong>. Сразу после этого перезагрузи телефон.</li>
+            </ol>
+            <div class="badge-alert" style="margin-top: 12px;">
+                <strong>🚨 ТЕБЯ СПАЛЯТ В ТУ ЖЕ СЕКУНДУ!</strong> <br>
+                Нам плевать, что временно заглючат карты или геолокация, но этот сброс мгновенно обрывает сигнал. На
+                телефонах у родителей тут же выскочит громкое автоматическое уведомление от Family Link:
+                <strong>«Устройство ребёнка потеряло связь / Смартфон не в сети»</strong>. К тебе сразу же придут с
+                проверкой и вопросами, почему ты отключилась от сети. Используй это только тогда, когда готова к
+                серьёзному разговору!
+            </div>
+        </div>
+
+        <!-- Подвал -->
+        <footer>
+            Всё получится! Главное — делай аккуратно. ✨
+        </footer>
+
+    </div>
+
+    <!-- Логика работы калькулятора и проверки пароля -->
+    <script>
+        const SECRET_PASSWORD = '7777'; // Твой секретный код доступа
+        let currentInput = '';
+
+        function updateScreen(value) {
+            document.getElementById('calcScreen').innerText = value || '0';
+        }
+
+        function pressNum(num) {
+            if (currentInput === '0') {
+                currentInput = num;
+            } else {
+                currentInput += num;
+            }
+            updateScreen(currentInput);
+        }
+
+        function pressOp(op) {
+            if (currentInput !== '' && !['+', '-', '*', '/'].includes(currentInput.slice(-1))) {
+                currentInput += op;
+                updateScreen(currentInput);
+            }
+        }
+
+        function clearScreen() {
+            currentInput = '';
+            updateScreen('0');
+        }
+
+        function calculate() {
+            // Главная проверка на секретный пароль
+            if (currentInput === SECRET_PASSWORD) {
+                document.getElementById('calcWrapper').style.display = 'none';
+                document.getElementById('guideContent').style.display = 'flex';
+                return;
+            }
+
+            // Если это не пароль, считаем как обычный калькулятор
+            try {
+                if (currentInput !== '') {
+                    let result = Function('"use strict";return (' + currentInput + ')')();
+                    currentInput = String(result);
+                    updateScreen(currentInput);
+                }
+            } catch (error) {
+                updateScreen('Ошибка');
+                currentInput = '';
+            }
+        }
+    </script>
+
+</body>
+
+</html>
